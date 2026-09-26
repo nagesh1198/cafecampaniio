@@ -1,0 +1,86 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    function isCafeStaff() {
+      return isAuthenticated() && 
+        (request.auth.token.role == 'CAFE_STAFF' || request.auth.token.role == 'CAFE_ADMIN');
+    }
+    function isCafeAdmin() {
+      return isAuthenticated() && request.auth.token.role == 'CAFE_ADMIN';
+    }
+
+    // Cafes: public read, admin write
+    match /cafes/{cafeId} {
+      allow read: if true;
+      allow write: if isCafeAdmin();
+    }
+
+    // Menu Items: public read, staff/admin write
+    match /menuItems/{itemId} {
+      allow read: if true;
+      allow write: if isCafeStaff();
+    }
+
+    // Orders: customer can read/create their own, staff can read/update all
+    match /orders/{orderId} {
+      allow read: if isOwner(resource.data.customerId) || isCafeStaff();
+      allow create: if isAuthenticated();
+      allow update: if isCafeStaff() || (isOwner(resource.data.customerId) && request.resource.data.status == 'CANCELLED');
+    }
+
+    // Customer Feedback: public read aggregate, customer create
+    match /feedback/{feedbackId} {
+      allow read: if true;
+      allow create: if isAuthenticated();
+      allow update, delete: if isCafeAdmin();
+    }
+
+    // User profiles & points wallet: owner only
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isCafeStaff();
+      allow write: if isOwner(userId) || isCafeAdmin();
+    }
+
+    // Play while you wait: games & sports public read, predictions owner only
+    match /games/{gameId} {
+      allow read: if true;
+      allow write: if isCafeAdmin();
+    }
+
+    match /gameEvents/{eventId} {
+      allow read: if true;
+      allow write: if isCafeAdmin();
+    }
+
+    match /predictions/{predictionId} {
+      allow read, write: if isAuthenticated() && request.auth.uid == request.resource.data.userId;
+    }
+
+    match /rewards/{rewardId} {
+      allow read: if true;
+      allow write: if isCafeAdmin();
+    }
+
+    // Open Space: ephemeral live presence and pings
+    match /openSpaceSessions/{sessionId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isOwner(request.resource.data.userId);
+    }
+
+    match /connectionPings/{pingId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    match /ephemeralChats/{chatId} {
+      allow read, write: if isAuthenticated() && request.auth.uid in resource.data.participantIds;
+    }
+  }
+}
