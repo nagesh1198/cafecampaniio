@@ -1,0 +1,7 @@
+{
+  "name": "Café Companion",
+  "description": "AI-powered café companion platform for customers and teams. Discover, order, connect, and enjoy with Google Gemini intelligence.",
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
