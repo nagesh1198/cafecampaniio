@@ -1019,6 +1019,9 @@ app.patch('/api/orders/:id/status', (req, res) => {
   } else if (status === 'COMPLETED') {
     order.stepIndex = 4;
     order.completedAt = new Date().toISOString();
+  } else if (status === 'CANCELLED') {
+    order.stepIndex = 0;
+    order.cancelledAt = new Date().toISOString();
   }
 
   res.json({ success: true, order });
@@ -1397,6 +1400,10 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`☕ Café Companion backend running on port ${PORT}`);
-});
+if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`☕ Café Companion backend running on port ${PORT}`);
+  });
+}
+
+export default app;

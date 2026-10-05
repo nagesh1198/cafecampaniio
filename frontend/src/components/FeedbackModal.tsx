@@ -56,9 +56,25 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
     );
   };
 
+  // Close on Escape key press
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-cafe-900/40 backdrop-blur-sm animate-fade-in">
-      <div className="bg-white w-full max-w-md rounded-2xl shadow-lift border border-cream-200 overflow-hidden">
+    <div 
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-cafe-950/60 backdrop-blur-sm animate-fade-in"
+    >
+      <div 
+        onClick={(e) => e.stopPropagation()}
+        className="bg-white w-full max-w-md max-h-[85vh] rounded-3xl shadow-2xl border border-cream-200 overflow-hidden my-auto animate-scale-up flex flex-col"
+      >
         {/* Header */}
         <div className="p-4 bg-cream-50 border-b border-cream-200 flex items-center justify-between">
           <div className="flex items-center gap-2">

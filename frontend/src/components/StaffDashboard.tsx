@@ -13,7 +13,8 @@ import {
   Users,
   ShieldCheck,
   ChevronRight,
-  Flame
+  Flame,
+  Award
 } from 'lucide-react';
 import { Order, MenuItem, OperationalInsight } from '../types';
 import { api } from '../services/api';

@@ -1,6 +1,6 @@
 import React from 'react';
 import { OrderStatus } from '../types';
-import { Sparkles, CheckCircle2, Clock, Flame, Coffee } from 'lucide-react';
+import { Sparkles, CheckCircle2, Clock } from 'lucide-react';
 
 interface BrewingVisualizerProps {
   status: OrderStatus;
@@ -19,48 +19,48 @@ export const BrewingVisualizer: React.FC<BrewingVisualizerProps> = ({
   const isPreparing = status === 'PREPARING';
 
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-card border border-cafe-100 flex flex-col items-center relative overflow-hidden">
+    <div className="bg-white rounded-2xl p-4 shadow-sm border border-cafe-100 flex flex-col items-center relative overflow-hidden">
       {/* Top Stage Indicator */}
-      <div className="w-full flex items-center justify-between mb-4 z-10">
+      <div className="w-full flex items-center justify-between mb-2 z-10">
         <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-cream-200 text-cafe-700">
+          <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-cream-200 text-cafe-700">
             Order {orderNumber}
           </span>
           {isReady ? (
-            <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-crowd-lowBg text-crowd-lowText flex items-center gap-1">
+            <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-crowd-lowBg text-crowd-lowText flex items-center gap-1">
               <CheckCircle2 size={12} /> Ready for Pickup
             </span>
           ) : (
-            <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 flex items-center gap-1">
-              <Clock size={12} className="animate-spin" /> Preparing Live
+            <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 flex items-center gap-1 border border-amber-200/50">
+              <Clock size={11} className="animate-spin text-amber-600" /> Preparing Live
             </span>
           )}
         </div>
         {estimatedReadyTime && (
-          <span className="text-xs font-medium text-cafe-500">
+          <span className="text-[11px] font-medium text-cafe-500">
             ETA: <strong className="text-cafe-800">{estimatedReadyTime}</strong>
           </span>
         )}
       </div>
 
-      {/* Interactive 3D / SVG Brewing Scene */}
-      <div className="relative w-64 h-56 flex items-center justify-center my-2">
+      {/* Interactive 3D / SVG Brewing Scene (Compact & Viewport-friendly) */}
+      <div className="relative w-40 h-32 flex items-center justify-center my-1">
         {/* Soft radial backdrop glow */}
-        <div className={`absolute inset-0 rounded-full blur-2xl transition-all duration-700 ${
-          isReady ? 'bg-amber-200/40 scale-110' : isPreparing ? 'bg-amber-100/50 scale-100' : 'bg-cream-200/40'
+        <div className={`absolute inset-0 rounded-full blur-xl transition-all duration-700 ${
+          isReady ? 'bg-amber-200/40 scale-105' : isPreparing ? 'bg-amber-100/50 scale-95' : 'bg-cream-200/40'
         }`} />
 
         {/* Rising Steam Wisps when Preparing or Ready */}
         {(isPreparing || isReady) && (
-          <div className="absolute -top-3 w-32 h-16 flex justify-around pointer-events-none z-20">
-            <div className="w-3 h-10 rounded-full bg-gradient-to-t from-cafe-300/40 to-transparent blur-[2px] animate-bounce [animation-duration:2.4s]" />
-            <div className="w-4 h-12 rounded-full bg-gradient-to-t from-cafe-300/50 to-transparent blur-[3px] animate-bounce [animation-duration:3.1s] [animation-delay:0.5s]" />
-            <div className="w-3 h-9 rounded-full bg-gradient-to-t from-cafe-300/35 to-transparent blur-[2px] animate-bounce [animation-duration:2.8s] [animation-delay:1.1s]" />
+          <div className="absolute -top-1 w-24 h-10 flex justify-around pointer-events-none z-20">
+            <div className="w-2 h-7 rounded-full bg-gradient-to-t from-cafe-300/40 to-transparent blur-[1.5px] animate-bounce [animation-duration:2.4s]" />
+            <div className="w-2.5 h-8 rounded-full bg-gradient-to-t from-cafe-300/50 to-transparent blur-[2px] animate-bounce [animation-duration:3.1s] [animation-delay:0.5s]" />
+            <div className="w-2 h-6 rounded-full bg-gradient-to-t from-cafe-300/35 to-transparent blur-[1.5px] animate-bounce [animation-duration:2.8s] [animation-delay:1.1s]" />
           </div>
         )}
 
         {/* SVG Interactive Brewing Cup */}
-        <svg width="220" height="190" viewBox="0 0 220 190" className="relative z-10 drop-shadow-md">
+        <svg viewBox="0 0 220 190" className="w-36 h-28 relative z-10 drop-shadow-sm">
           <defs>
             {/* Liquid Clipping Mask */}
             <clipPath id="cupClip">
@@ -164,22 +164,22 @@ export const BrewingVisualizer: React.FC<BrewingVisualizerProps> = ({
           <ellipse cx="110" cy="40" rx="63" ry="8" fill="#FFFBF0" opacity="0.4" />
         </svg>
 
-        {/* Ready Celebration Badge Badge */}
+        {/* Ready Celebration Badge */}
         {isReady && (
-          <div className="absolute bottom-2 px-3 py-1 bg-amber-500 text-white rounded-full text-xs font-bold shadow-md flex items-center gap-1.5 animate-bounce">
-            <Sparkles size={13} /> Freshly Crafted!
+          <div className="absolute bottom-1 px-2.5 py-0.5 bg-amber-500 text-white rounded-full text-[11px] font-bold shadow-md flex items-center gap-1 animate-bounce">
+            <Sparkles size={11} /> Ready!
           </div>
         )}
       </div>
 
       {/* 4-Stage Step Progress Pipeline */}
-      <div className="w-full max-w-sm mt-4 pt-4 border-t border-cream-200">
+      <div className="w-full max-w-xs mt-1 pt-2.5 border-t border-cream-200">
         <div className="flex items-center justify-between text-center relative">
           {/* Progress bar line */}
-          <div className="absolute top-3 left-4 right-4 h-1 bg-cream-200 -z-0">
+          <div className="absolute top-2.5 left-4 right-4 h-0.5 bg-cream-200 -z-0">
             <div
               className="h-full bg-sage-400 transition-all duration-700"
-              style={{ width: `${((stepIndex - 1) / 3) * 100}%` }}
+              style={{ width: `${Math.max(0, ((stepIndex - 1) / 3) * 100)}%` }}
             />
           </div>
 
@@ -195,18 +195,18 @@ export const BrewingVisualizer: React.FC<BrewingVisualizerProps> = ({
             return (
               <div key={s.step} className="flex flex-col items-center z-10">
                 <div
-                  className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 ${
+                  className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold transition-all duration-300 ${
                     isPassed
-                      ? 'bg-sage-400 text-white shadow-sm'
+                      ? 'bg-sage-400 text-white shadow-xs'
                       : isCurrent
-                      ? 'bg-amber-500 text-white ring-4 ring-amber-100'
+                      ? 'bg-amber-500 text-white ring-2 ring-amber-200'
                       : 'bg-white text-cafe-400 border border-cream-300'
                   }`}
                 >
                   {isPassed ? '✓' : s.step}
                 </div>
-                <span className={`text-[11px] mt-1.5 font-medium ${
-                  isCurrent ? 'text-cafe-900 font-semibold' : 'text-cafe-400'
+                <span className={`text-[10px] mt-1 font-medium ${
+                  isCurrent ? 'text-cafe-900 font-bold' : 'text-cafe-400'
                 }`}>
                   {s.label}
                 </span>

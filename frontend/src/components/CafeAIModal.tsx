@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { X, Sparkles, Send, Coffee, Plus, Check, Loader2 } from 'lucide-react';
-import { MenuItem } from '../types';
+import React, { useState, useEffect } from 'react';
+import { X, Sparkles, Send, Plus, Minus, Check, Loader2, ShoppingBag } from 'lucide-react';
+import { MenuItem, CartItem } from '../types';
 import { api } from '../services/api';
 
 interface CafeAIModalProps {
@@ -9,6 +9,9 @@ interface CafeAIModalProps {
   cafeId: string;
   cafeName: string;
   onAddToCart: (item: MenuItem) => void;
+  cartItems?: CartItem[];
+  onOpenCart?: () => void;
+  onUpdateQuantity?: (menuItemId: string, delta: number) => void;
 }
 
 interface ChatMessage {
@@ -23,7 +26,10 @@ export const CafeAIModal: React.FC<CafeAIModalProps> = ({
   onClose,
   cafeId,
   cafeName,
-  onAddToCart
+  onAddToCart,
+  cartItems = [],
+  onOpenCart,
+  onUpdateQuantity
 }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
@@ -34,7 +40,16 @@ export const CafeAIModal: React.FC<CafeAIModalProps> = ({
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [addedItemIds, setAddedItemIds] = useState<string[]>([]);
+
+  // Close on Escape key press
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
@@ -72,15 +87,20 @@ export const CafeAIModal: React.FC<CafeAIModalProps> = ({
 
   const handleQuickAdd = (item: MenuItem) => {
     onAddToCart(item);
-    setAddedItemIds(prev => [...prev, item.id]);
-    setTimeout(() => {
-      setAddedItemIds(prev => prev.filter(id => id !== item.id));
-    }, 2000);
   };
 
+  const totalCartCount = cartItems.reduce((acc, ci) => acc + ci.quantity, 0);
+  const totalCartPrice = cartItems.reduce((acc, ci) => acc + ci.menuItem.price * ci.quantity, 0);
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-cafe-900/40 backdrop-blur-sm animate-fade-in">
-      <div className="bg-white w-full max-w-lg rounded-2xl shadow-lift border border-cream-200 flex flex-col h-[600px] max-h-[90vh] overflow-hidden">
+    <div 
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-cafe-950/60 backdrop-blur-sm animate-fade-in"
+    >
+      <div 
+        onClick={(e) => e.stopPropagation()}
+        className="bg-white w-full max-w-lg rounded-3xl shadow-2xl border border-cream-200 flex flex-col h-[580px] max-h-[85vh] overflow-hidden my-auto animate-scale-up"
+      >
         {/* Header */}
         <div className="p-4 bg-cream-50 border-b border-cream-200 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
@@ -128,7 +148,9 @@ export const CafeAIModal: React.FC<CafeAIModalProps> = ({
                       Recommended from Live Menu:
                     </div>
                     {m.suggestedItems.map((item) => {
-                      const isAdded = addedItemIds.includes(item.id);
+                      const inCartItem = cartItems.find(ci => ci.menuItem.id === item.id);
+                      const inCartQty = inCartItem?.quantity || 0;
+
                       return (
                         <div
                           key={item.id}
@@ -145,26 +167,52 @@ export const CafeAIModal: React.FC<CafeAIModalProps> = ({
                               <div className="text-[11px] text-cafe-500">₹{item.price} • {item.preparationTimeMinutes} min</div>
                             </div>
                           </div>
-                          <button
-                            onClick={() => handleQuickAdd(item)}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all ${
-                              isAdded
-                                ? 'bg-sage-400 text-white'
-                                : 'bg-cafe-600 hover:bg-cafe-700 text-white shadow-sm'
-                            }`}
-                          >
-                            {isAdded ? (
-                              <>
-                                <Check size={12} />
-                                <span>Added</span>
-                              </>
-                            ) : (
-                              <>
-                                <Plus size={12} />
-                                <span>Add</span>
-                              </>
-                            )}
-                          </button>
+
+                          {inCartQty > 0 ? (
+                            <div className="flex items-center gap-1 bg-sage-50 border border-sage-300 rounded-lg p-0.5">
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (onUpdateQuantity) {
+                                    onUpdateQuantity(item.id, -1);
+                                  }
+                                }}
+                                className="w-6 h-6 rounded-md bg-white hover:bg-red-50 text-cafe-700 hover:text-red-600 border border-sage-200 flex items-center justify-center font-bold text-xs transition-colors"
+                                title="Remove one from tray"
+                              >
+                                <Minus size={11} />
+                              </button>
+                              <span className="text-[11px] font-bold text-sage-800 flex items-center gap-1 px-1 min-w-[42px] justify-center">
+                                <Check size={11} className="text-sage-600" />
+                                <span>{inCartQty}</span>
+                              </span>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (onUpdateQuantity) {
+                                    onUpdateQuantity(item.id, 1);
+                                  } else {
+                                    handleQuickAdd(item);
+                                  }
+                                }}
+                                className="w-6 h-6 rounded-md bg-sage-600 hover:bg-sage-700 text-white flex items-center justify-center font-bold text-xs shadow-xs transition-colors"
+                                title="Add one more to tray"
+                              >
+                                <Plus size={11} />
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => handleQuickAdd(item)}
+                              className="px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 bg-cafe-600 hover:bg-cafe-700 text-white shadow-sm transition-all"
+                            >
+                              <Plus size={12} />
+                              <span>Add to Tray</span>
+                            </button>
+                          )}
                         </div>
                       );
                     })}
@@ -200,6 +248,25 @@ export const CafeAIModal: React.FC<CafeAIModalProps> = ({
             </button>
           ))}
         </div>
+
+        {/* Live Tray Footer Bar if Items Added */}
+        {totalCartCount > 0 && onOpenCart && (
+          <div className="px-4 py-2.5 bg-sage-50 border-t border-sage-200 flex items-center justify-between animate-fade-in">
+            <div className="flex items-center gap-2 text-xs text-sage-900 font-medium">
+              <ShoppingBag size={14} className="text-sage-700" />
+              <span>Tray has <strong className="font-bold">{totalCartCount} item{totalCartCount > 1 ? 's' : ''}</strong> (₹{totalCartPrice})</span>
+            </div>
+            <button
+              onClick={() => {
+                onClose();
+                onOpenCart();
+              }}
+              className="text-xs font-bold text-sage-800 bg-white hover:bg-sage-100 px-2.5 py-1 rounded-md border border-sage-300 transition-colors shadow-2xs"
+            >
+              View Tray →
+            </button>
+          </div>
+        )}
 
         {/* Input Bar */}
         <form

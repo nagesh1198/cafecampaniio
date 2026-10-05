@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Award, Trophy, Gamepad2, Gift, CheckCircle2, ChevronRight, Zap, Flame, Clock } from 'lucide-react';
+import { Award, Trophy, Gamepad2, Gift, CheckCircle2, ChevronRight, Zap, Flame, Clock, Coins } from 'lucide-react';
 import { MiniGame, SportsEvent, Reward, PointsWallet } from '../types';
 import { api } from '../services/api';
 import confetti from 'canvas-confetti';
@@ -96,29 +96,34 @@ export const PlayWaitCenter: React.FC<PlayWaitCenterProps> = ({
   return (
     <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-card border border-cream-200">
       {/* Wallet Bar Banner */}
-      <div className="bg-cream-100 rounded-2xl p-4 sm:p-5 flex flex-wrap items-center justify-between gap-4 mb-6 border border-cream-200/80">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl bg-amber-500 text-white flex items-center justify-center text-2xl shadow-sm">
-            🪙
+      <div className="bg-cream-100 rounded-2xl p-4 sm:p-5 flex flex-wrap items-center justify-between gap-4 mb-6 border border-cream-200/80 shadow-soft">
+        <div className="flex items-center gap-3.5">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 text-white flex items-center justify-center shadow-sm shrink-0 border border-amber-300/40">
+            <Coins size={22} className="text-amber-100 stroke-[2.2]" />
           </div>
-          <div>
-            <div className="text-xs font-bold uppercase tracking-wider text-cafe-500">
+          <div className="flex flex-col justify-center">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-cafe-500 leading-tight">
               Your Café Points Wallet
-            </div>
-            <div className="text-2xl sm:text-3xl font-extrabold text-cafe-900 font-serif">
-              {pointsWallet.balance} <span className="text-sm font-semibold text-cafe-600">Points</span>
+            </span>
+            <div className="flex items-baseline gap-2 mt-1">
+              <span className="text-3xl sm:text-4xl font-black text-cafe-900 tracking-tight tabular-nums leading-none font-sans">
+                {pointsWallet.balance.toLocaleString()}
+              </span>
+              <span className="text-sm font-bold text-cafe-600 leading-none font-sans">
+                Points
+              </span>
             </div>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="text-right">
-            <div className="text-[11px] text-cafe-500 font-medium">Today's Earnings</div>
-            <div className="text-sm font-bold text-sage-600">+{pointsWallet.todayEarned} pts</div>
+          <div className="bg-white/90 px-3.5 py-1.5 rounded-xl border border-cream-200 shadow-xs text-right">
+            <div className="text-[10px] text-cafe-500 font-bold uppercase tracking-wider leading-none">Today's Earnings</div>
+            <div className="text-sm font-extrabold text-sage-700 tabular-nums leading-tight mt-0.5 font-sans">+{pointsWallet.todayEarned} pts</div>
           </div>
           <button
             onClick={() => setActiveTab('rewards')}
-            className="px-4 py-2 bg-cafe-600 hover:bg-cafe-700 text-white rounded-xl text-xs font-bold shadow-sm transition-all"
+            className="px-4 py-2.5 bg-cafe-600 hover:bg-cafe-700 text-white rounded-xl text-xs font-bold shadow-sm transition-all hover:scale-[1.02]"
           >
             Redeem Rewards
           </button>

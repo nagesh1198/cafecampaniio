@@ -100,27 +100,32 @@ export default function App() {
     api.getUserPoints().then(setPointsWallet);
   };
 
-  // Cart operations
+  // Cart operations (immutable state updates to prevent StrictMode double-increment)
   const handleAddToCart = (item: MenuItem, customizations?: any) => {
     setCartItems(prev => {
       const existingIdx = prev.findIndex(ci => ci.menuItem.id === item.id);
       if (existingIdx > -1) {
-        const next = [...prev];
-        next[existingIdx].quantity += 1;
-        return next;
+        return prev.map((ci, idx) =>
+          idx === existingIdx ? { ...ci, quantity: ci.quantity + 1 } : ci
+        );
       }
       return [...prev, { menuItem: item, quantity: 1, customizations }];
     });
   };
 
+  const handleUpdateItemQuantity = (menuItemId: string, delta: number) => {
+    setCartItems(prev => {
+      return prev
+        .map(ci => (ci.menuItem.id === menuItemId ? { ...ci, quantity: ci.quantity + delta } : ci))
+        .filter(ci => ci.quantity > 0);
+    });
+  };
+
   const handleUpdateCartQuantity = (index: number, delta: number) => {
     setCartItems(prev => {
-      const next = [...prev];
-      next[index].quantity += delta;
-      if (next[index].quantity <= 0) {
-        return next.filter((_, i) => i !== index);
-      }
-      return next;
+      return prev
+        .map((ci, i) => (i === index ? { ...ci, quantity: ci.quantity + delta } : ci))
+        .filter(ci => ci.quantity > 0);
     });
   };
 
@@ -160,6 +165,19 @@ export default function App() {
     }
   };
 
+  const handleCancelOrder = async (orderId: string) => {
+    try {
+      const updated = await api.updateOrderStatus(orderId, 'CANCELLED');
+      setOrders(prev => prev.map(o => o.id === orderId ? updated : o));
+      if (activeTrackingOrder?.id === orderId) {
+        setActiveTrackingOrder(null);
+      }
+      setIsTrackingOpen(false);
+    } catch (err) {
+      console.error('Failed to cancel order:', err);
+    }
+  };
+
   const cartCount = cartItems.reduce((sum, it) => sum + it.quantity, 0);
 
   return (
@@ -186,6 +204,8 @@ export default function App() {
         pointsBalance={pointsWallet.balance}
         onOpenRewards={() => setCurrentTab('games')}
         onOpenAI={() => setIsAIModalOpen(true)}
+        openSpaceCount={openSpaceCount}
+        isOpenSpaceOpen={isOpenSpaceOpen}
       />
 
       {/* Main Content Area */}
@@ -432,6 +452,8 @@ export default function App() {
                   menuItems={menuItems}
                   onAddToCart={handleAddToCart}
                   cafeName={selectedCafe?.name || 'Artisan Roastery'}
+                  cartItems={cartItems}
+                  onUpdateQuantity={handleUpdateItemQuantity}
                 />
               </div>
             )}
@@ -471,6 +493,9 @@ export default function App() {
         cafeId={selectedCafe?.id || 'cafe-artisan-roastery'}
         cafeName={selectedCafe?.name || 'Artisan Roastery & Lab'}
         onAddToCart={handleAddToCart}
+        cartItems={cartItems}
+        onOpenCart={() => setIsCartOpen(true)}
+        onUpdateQuantity={handleUpdateItemQuantity}
       />
 
       <OpenSpaceDrawer
@@ -501,6 +526,7 @@ export default function App() {
             setIsFeedbackOpen(true);
           }}
           onOpenOpenSpace={() => setIsOpenSpaceOpen(true)}
+          onCancelOrder={handleCancelOrder}
         />
       )}
 
@@ -522,6 +548,9 @@ export default function App() {
         onSelectMenuTab={() => setCurrentTab('menu')}
         onOpenOpenSpace={() => setIsOpenSpaceOpen(true)}
         openSpaceCount={openSpaceCount}
+        onAddToCart={handleAddToCart}
+        cartItems={cartItems}
+        onUpdateQuantity={handleUpdateItemQuantity}
       />
     </div>
   );

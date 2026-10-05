@@ -261,7 +261,8 @@ export const InteractiveCupStudio: React.FC<InteractiveCupStudioProps> = ({
       ingredients: [config.base, config.milk, config.syrup].filter(i => i !== 'none'),
       calories: metrics.calories,
       caffeineMg: metrics.caffeine,
-      isPopular: true
+      isPopular: true,
+      image: 'https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?auto=format&fit=crop&w=600&q=80'
     };
 
     onAddToCart(menuItem, config);
