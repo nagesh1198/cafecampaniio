@@ -11,9 +11,12 @@ import {
   Home,
   Users,
   Coins,
-  UserCheck
+  UserCheck,
+  Volume2,
+  VolumeX
 } from 'lucide-react';
 import { UserRole } from '../types';
+import { baristaAudio } from './AudioBarista';
 
 interface NavbarProps {
   currentTab: string;
@@ -42,6 +45,13 @@ export const Navbar: React.FC<NavbarProps> = ({
   openSpaceCount = 0,
   isOpenSpaceOpen = false
 }) => {
+  const [isAudioMuted, setIsAudioMuted] = React.useState(() => baristaAudio.isMuted);
+
+  const toggleSound = () => {
+    const nextMuted = baristaAudio.toggleMute();
+    setIsAudioMuted(nextMuted);
+  };
+
   // Navigation tabs with adaptive label lengths per breakpoint
   const NAV_ITEMS = [
     { id: 'home', label: 'Home', fullLabel: 'Home', shortLabel: 'Home', icon: Home },
@@ -152,6 +162,20 @@ export const Navbar: React.FC<NavbarProps> = ({
               </span>
             </button>
 
+            {/* Sound Synthesizer Audio Toggle */}
+            <button
+              onClick={toggleSound}
+              className={`p-1.5 sm:p-2 rounded-xl border transition-all shrink-0 ${
+                isAudioMuted
+                  ? 'bg-cream-100 hover:bg-cream-200 text-cafe-400 border-cream-200'
+                  : 'bg-white hover:bg-cream-50 text-amber-700 border-amber-300 shadow-xs'
+              }`}
+              title={isAudioMuted ? 'Sound Muted (Click to turn Barista Audio on)' : 'Barista Sound Active (Click to mute)'}
+              aria-label={isAudioMuted ? 'Unmute audio' : 'Mute audio'}
+            >
+              {isAudioMuted ? <VolumeX size={17} /> : <Volume2 size={17} className="text-amber-600" />}
+            </button>
+
             {/* Cart / Tray Trigger Button */}
             <button
               onClick={onOpenCart}
@@ -200,37 +224,6 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
         </div>
       </header>
-
-      {/* Mobile / Tablet Bottom Navigation Bar (Hidden on Desktop lg: 1024px+) */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-cream-200 flex items-center justify-around py-2 px-1 shadow-lg">
-        {NAV_ITEMS.map((item) => {
-          const Icon = item.icon;
-          const isActive = (item.id === 'openspace' && isOpenSpaceOpen) || (currentTab === item.id && !isOpenSpaceOpen);
-
-          return (
-            <button
-              key={item.id}
-              onClick={() => onSelectTab(item.id)}
-              className={`relative flex flex-col items-center gap-1 px-2 py-1 rounded-xl text-[10px] font-medium transition-colors ${
-                isActive ? 'text-cafe-800 font-bold' : 'text-cafe-400 hover:text-cafe-600'
-              }`}
-            >
-              <div className="relative">
-                <Icon size={18} className={isActive ? 'stroke-[2.5] text-cafe-700' : 'stroke-[1.8]'} />
-                {item.id === 'openspace' && openSpaceCount > 0 && (
-                  <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-white" />
-                )}
-              </div>
-              <span className="leading-none whitespace-nowrap">{item.shortLabel}</span>
-
-              {/* Active Indicator Micro-dot */}
-              {isActive && (
-                <span className="w-1 h-1 rounded-full bg-cafe-700 mt-0.5" />
-              )}
-            </button>
-          );
-        })}
-      </nav>
     </>
   );
 };

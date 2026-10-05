@@ -3,6 +3,7 @@ import { X, Sparkles, Star, AlertCircle, ArrowRight, CheckCircle2 } from 'lucide
 import { Order, PointsWallet } from '../types';
 import { BrewingVisualizer } from './BrewingVisualizer';
 import { PlayWaitCenter } from './PlayWaitCenter';
+import { baristaAudio } from './AudioBarista';
 
 interface OrderTrackingModalProps {
   isOpen: boolean;
@@ -41,6 +42,13 @@ export const OrderTrackingModal: React.FC<OrderTrackingModalProps> = ({
       return () => window.removeEventListener('keydown', handleKeyDown);
     }
   }, [isOpen, onClose]);
+
+  // Play chime when order becomes READY
+  useEffect(() => {
+    if (isOpen && order?.status === 'READY') {
+      baristaAudio.playChime();
+    }
+  }, [isOpen, order?.status]);
 
   if (!isOpen || !order) return null;
 

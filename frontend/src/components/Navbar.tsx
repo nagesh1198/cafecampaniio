@@ -11,9 +11,12 @@ import {
   Home,
   Users,
   Coins,
-  UserCheck
+  UserCheck,
+  Volume2,
+  VolumeX
 } from 'lucide-react';
 import { UserRole } from '../types';
+import { baristaAudio } from './AudioBarista';
 
 interface NavbarProps {
   currentTab: string;
@@ -42,6 +45,13 @@ export const Navbar: React.FC<NavbarProps> = ({
   openSpaceCount = 0,
   isOpenSpaceOpen = false
 }) => {
+  const [isAudioMuted, setIsAudioMuted] = React.useState(() => baristaAudio.isMuted);
+
+  const toggleSound = () => {
+    const nextMuted = baristaAudio.toggleMute();
+    setIsAudioMuted(nextMuted);
+  };
+
   // Navigation tabs with adaptive label lengths per breakpoint
   const NAV_ITEMS = [
     { id: 'home', label: 'Home', fullLabel: 'Home', shortLabel: 'Home', icon: Home },
@@ -150,6 +160,20 @@ export const Navbar: React.FC<NavbarProps> = ({
                 {pointsBalance}
                 <span className="hidden sm:inline font-sans font-semibold text-cafe-600 ml-1">pts</span>
               </span>
+            </button>
+
+            {/* Sound Synthesizer Audio Toggle */}
+            <button
+              onClick={toggleSound}
+              className={`p-1.5 sm:p-2 rounded-xl border transition-all shrink-0 ${
+                isAudioMuted
+                  ? 'bg-cream-100 hover:bg-cream-200 text-cafe-400 border-cream-200'
+                  : 'bg-white hover:bg-cream-50 text-amber-700 border-amber-300 shadow-xs'
+              }`}
+              title={isAudioMuted ? 'Sound Muted (Click to turn Barista Audio on)' : 'Barista Sound Active (Click to mute)'}
+              aria-label={isAudioMuted ? 'Unmute audio' : 'Mute audio'}
+            >
+              {isAudioMuted ? <VolumeX size={17} /> : <Volume2 size={17} className="text-amber-600" />}
             </button>
 
             {/* Cart / Tray Trigger Button */}

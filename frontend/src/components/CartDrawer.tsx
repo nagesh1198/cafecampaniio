@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X, Trash2, Plus, Minus, Coffee, Sparkles, CheckCircle2 } from 'lucide-react';
 import { CartItem, Order } from '../types';
 import confetti from 'canvas-confetti';
+import { baristaAudio } from './AudioBarista';
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -33,6 +34,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
     if (items.length === 0 || isSubmitting) return;
     setIsSubmitting(true);
     try {
+      baristaAudio.playChime();
       await onPlaceOrder(items, tip);
       if (typeof window !== 'undefined') {
         confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
@@ -88,7 +90,10 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
               {/* Quantity Counter */}
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => onUpdateQuantity(idx, -1)}
+                  onClick={() => {
+                    baristaAudio.playClick();
+                    onUpdateQuantity(idx, -1);
+                  }}
                   className="w-6 h-6 rounded-lg bg-white border border-cream-300 flex items-center justify-center text-xs text-cafe-700"
                 >
                   <Minus size={11} />
@@ -97,7 +102,10 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                   {cartItem.quantity}
                 </span>
                 <button
-                  onClick={() => onUpdateQuantity(idx, 1)}
+                  onClick={() => {
+                    baristaAudio.playClick();
+                    onUpdateQuantity(idx, 1);
+                  }}
                   className="w-6 h-6 rounded-lg bg-white border border-cream-300 flex items-center justify-center text-xs text-cafe-700"
                 >
                   <Plus size={11} />
